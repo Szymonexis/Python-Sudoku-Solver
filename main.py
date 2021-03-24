@@ -10,6 +10,7 @@
 
 verbose_counter = 0
 
+dupa = 0
 
 # reads from csv file - format each csv line is a line of sudoku puzzle
 def read_from_file(file_name):

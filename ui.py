@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+from algorithm import backtracking_algorithm_sudoku_solve
 
 # init pygame
 pygame.init()
@@ -10,6 +11,8 @@ fps = 30
 tile_width, tile_height = 100, 100
 sudoku_file_name = os.path.join("Assets", "test_sudoku.csv")
 mouse_x, mouse_y = 0, 0
+number_buttons = (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
+                  pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9)
 
 # colors
 white = (255, 255, 255)
@@ -31,55 +34,6 @@ pygame.display.set_caption("Sudoku")
 icon = pygame.image.load(os.path.join("Assets", "icon_sudoku.png"))  # TODO find a working .png for icon
 pygame.display.set_icon(icon)
 clock = pygame.time.Clock()
-
-
-def find_empty(given_board):
-    for i in range(len(given_board)):
-        for j in range(len(given_board[0])):
-            if given_board[i][j] == 0:
-                return (i, j)   # row, column
-    return None
-
-
-def is_board_valid(given_board, given_digit, position):
-    # row check
-    for index in range(len(given_board[0])):
-        if given_board[position[0]][index] == given_digit and position[1] != index:
-            return False
-
-    # column check
-    for index in range(len(given_board)):
-        if given_board[index][position[1]] == given_digit and position[0] != index:
-            return False
-
-    # subgrid check
-    subgrid_x = position[1] // 3
-    subgrid_y = position[0] // 3
-
-    for index1 in range(subgrid_y * 3, subgrid_y * 3 + 3):
-        for index2 in range(subgrid_x * 3, subgrid_x * 3 + 3):
-            if given_board[index1][index2] == given_digit and (index1, index2) != position:
-                return False
-
-    return True
-
-
-def backtracking_algorithm_sudoku_solve(given_board):
-    empty_position = find_empty(given_board)
-    if not empty_position:
-        return True
-    else:
-        row, column = empty_position
-
-    for digit in range(1, 10):
-        if is_board_valid(given_board, digit, (row, column)):
-            given_board[row][column] = digit
-
-            if backtracking_algorithm_sudoku_solve(given_board):
-                return True
-            given_board[row][column] = 0
-
-    return False
 
 
 class Tile:
@@ -138,10 +92,7 @@ def read_from_file(file_name):
     index_sudoku_board = 0
 
     for index in range(0, 81):
-        if int(sudoku_numbers[index]) != 0:
-            line.append(sudoku_numbers[index])
-        else:
-            line.append(0)
+        line.append(int(sudoku_numbers[index]))
         if len(line) == 9:
             sudoku_board.append(line)
             index_sudoku_board += 1
@@ -158,8 +109,8 @@ def draw_screen(sudoku_grid, mouse_x, mouse_y):
     for i in range(len(sudoku_grid)):
         for j in range(len(sudoku_grid[0])):
             digit = sudoku_grid[i][j]
-            # if sudoku_grid[i][j] == 0:
-            #     digit = " "
+            if sudoku_grid[i][j] == 0:
+                digit = " "
 
             if j == 8:
                 Tile(black, pos_x, pos_y, str(digit))
@@ -190,9 +141,9 @@ sudoku_board = read_from_file(sudoku_file_name)
 
 
 def main():
-    global resize_w, resize_h, width, height, background, mouse_x, mouse_y
+    global resize_w, resize_h, width, height, background, mouse_x, mouse_y, number_buttons
     while True:
-        clock.tick(fps)
+        # clock.tick(fps)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -211,8 +162,10 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    #  TODO does only one pass through - fix
                     backtracking_algorithm_sudoku_solve(sudoku_board)
+
+                if event.key in number_buttons:
+                    print(event.key - 48)
 
         draw_screen(sudoku_board, mouse_x, mouse_y)
     main()

@@ -21,7 +21,7 @@ purple = (255, 0, 255)
 
 # screen creation
 width, height = 1200, 1200
-resize_w, resize_h = width / 12, height / 12    # TODO lags, checkout https://www.youtube.com/watch?v=edJZOQwrMKw
+resize_w, resize_h = width / 12, height / 12    # TODO lags, checkout "https://www.youtube.com/watch?v=edJZOQwrMKw"
 flags = pygame.RESIZABLE   # TODO add later - find out how to get current window size
 screen = pygame.display.set_mode((width, height), flags)
 background = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "background.jpg")), (width, height))

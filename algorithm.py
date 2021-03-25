@@ -145,7 +145,7 @@ def backtracking_algorithm_sudoku_solve(given_board):
     return False
 
 
-sudoku = read_from_file("test_sudoku.csv")
+sudoku = read_from_file("Assets/test_sudoku.csv")
 
 print_board(sudoku)
 backtracking_algorithm_sudoku_solve(sudoku)

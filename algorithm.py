@@ -138,7 +138,7 @@ def backtracking_algorithm_sudoku_solve(given_board):
         if is_board_valid(given_board, digit, (row, column)):
             given_board[row][column] = digit
 
-            if backtracking_algorithm_sudoku_solve(given_board):    # TODO doesn't work, probably recursion wrong
+            if backtracking_algorithm_sudoku_solve(given_board):
                 return True
             given_board[row][column] = 0
 

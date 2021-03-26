@@ -7,12 +7,16 @@ from algorithm import backtracking_algorithm_sudoku_solve
 pygame.init()
 
 # game specific variables
-fps = 30
+fps = 120
 tile_width, tile_height = 100, 100
 sudoku_file_name = os.path.join("Assets", "test_sudoku.csv")
 mouse_x, mouse_y = 0, 0
 number_buttons = (pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,
                   pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9)
+keyboard_digit = 0
+PLAYER_WON = pygame.USEREVENT + 1
+COMPUTER_WON = pygame.USEREVENT + 2
+
 
 # colors
 white = (255, 255, 255)
@@ -37,7 +41,15 @@ clock = pygame.time.Clock()
 
 
 class Tile:
-    def __init__(self, border_color, position_x, position_y, digit):
+    def __init__(self, border_color, position_x, position_y, digit, index):
+        self.position_x_begin = position_x
+        self.position_x_end = position_x + int(resize_w * 100)
+
+        self.position_y_begin = position_y
+        self.position_y_end = position_y + int(resize_h * 100)
+
+        self.index = index
+
         self.font = pygame.font.SysFont('comicsans', int(resize_w * 75))
         self.tile_border = pygame.draw.rect(screen, border_color, (int(position_x + resize_w * 30),
                                                                    int(position_y + resize_h * 30),
@@ -52,6 +64,10 @@ class Tile:
         screen.blit(self.font.render(str(digit), True, black), (int(position_x + resize_w * 65),
                                                                 int(position_y + resize_h * 60),
                                                                 resize_w * 50, resize_h * 50))
+        self.active = False
+
+    def change_state(self):
+        self.active = True
 
 
 class LinesVertical:
@@ -101,31 +117,35 @@ def read_from_file(file_name):
     return sudoku_board
 
 
-def draw_screen(sudoku_grid, mouse_x, mouse_y):
+def draw_screen(sudoku_grid, mouse_x, mouse_y, given_digit, changeable_indexes):
     screen.blit(background, (0, 0))
 
     pos_x = 0
     pos_y = 0
-    for i in range(len(sudoku_grid)):
-        for j in range(len(sudoku_grid[0])):
-            digit = sudoku_grid[i][j]
-            if sudoku_grid[i][j] == 0:
-                digit = " "
+    for row in range(len(sudoku_grid)):
+        for column in range(len(sudoku_grid[0])):
+            sudoku_digit = sudoku_grid[row][column]
+            if sudoku_grid[row][column] == 0:
+                sudoku_digit = " "
 
-            if j == 8:
-                Tile(black, pos_x, pos_y, str(digit))
+            if column == 8:
+                Tile(black, pos_x, pos_y, str(sudoku_digit), (row, column))
                 # TODO figure out how to change this behaviour
                 if (pos_x + int(resize_w * 30)) <= mouse_x <= (pos_x + int(resize_w * 130)) and \
                         (pos_y + int(resize_h * 30)) <= mouse_y <= (pos_y + int(resize_h * 130)):
-                    Tile(green, pos_x, pos_y, str(digit))
+                    Tile(green, pos_x, pos_y, str(sudoku_digit), (row, column)).change_state()
+                    if (row, column) in changeable_indexes:
+                        sudoku_grid[row][column] = given_digit
 
                 pos_y += int(resize_h * 130)
                 pos_x = 0
             else:
-                Tile(black, pos_x, pos_y, str(digit))
+                Tile(black, pos_x, pos_y, str(sudoku_digit), (row, column))
                 if (pos_x + int(resize_w * 30)) <= mouse_x <= (pos_x + int(resize_w * 130)) and \
                         (pos_y + int(resize_h * 30)) <= mouse_y <= (pos_y + int(resize_h * 130)):
-                    Tile(green, pos_x, pos_y, str(digit))
+                    Tile(green, pos_x, pos_y, str(sudoku_digit), (row, column)).change_state()
+                    if (row, column) in changeable_indexes:
+                        sudoku_grid[row][column] = given_digit
 
                 pos_x += int(resize_w * 130)
 
@@ -136,14 +156,38 @@ def draw_screen(sudoku_grid, mouse_x, mouse_y):
     pygame.display.update()
 
 
-# creation of the sudoku board from file
+def check_if_grid_correct(given_solved_sudoku_grid, given_sudoku_grid):
+    for row in range(len(given_solved_sudoku_grid)):
+        for column in range(len(given_solved_sudoku_grid[0])):
+            if given_solved_sudoku_grid[row][column] != given_sudoku_grid[row][column]:
+                given_sudoku_grid[row][column] = 0
+
+
+def game_end(given_message):
+    screen.blit(background, (0, 0))
+
+    font = pygame.font.SysFont('comicsans', int(resize_w * 75))
+    screen.blit(font.render(str(given_message), True, black), (int(resize_w * 425),
+                                                               int(resize_h * 575),
+                                                               resize_w * 350, resize_h * 50))
+
+
+# creation of the sudoku board from file and changeable indexes marking
 sudoku_board = read_from_file(sudoku_file_name)
+changeable_indexes = []
+for i in range(len(sudoku_board)):
+    for j in range(len(sudoku_board[0])):
+        if sudoku_board[i][j] == 0:
+            changeable_indexes.append((i, j))
+
+solved_sudoku_board = read_from_file(sudoku_file_name)
+backtracking_algorithm_sudoku_solve(solved_sudoku_board)
 
 
 def main():
-    global resize_w, resize_h, width, height, background, mouse_x, mouse_y, number_buttons
+    global resize_w, resize_h, width, height, background, mouse_x, mouse_y, number_buttons, keyboard_digit
     while True:
-        # clock.tick(fps)
+        clock.tick(fps)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -159,15 +203,24 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     mouse_x, mouse_y = pygame.mouse.get_pos()
+                    keyboard_digit = 0
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    mouse_x, mouse_y = 0, 0
                     backtracking_algorithm_sudoku_solve(sudoku_board)
+                    # game_end("Computer won :c")
+                    # pygame.quit()
+                    # return
 
                 if event.key in number_buttons:
-                    print(event.key - 48)
+                    keyboard_digit = event.key - 48
 
-        draw_screen(sudoku_board, mouse_x, mouse_y)
+                if event.key == pygame.K_RETURN:
+                    mouse_x, mouse_y = 0, 0
+                    check_if_grid_correct(solved_sudoku_board, sudoku_board)
+
+        draw_screen(sudoku_board, mouse_x, mouse_y, keyboard_digit, changeable_indexes)
     main()
 
 

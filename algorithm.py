@@ -6,7 +6,7 @@
 # each row must have digits through 1 to 9
 # each column must have digits through 1 to 9
 # each 3x3 square must have digits through 1 to 9
-# each row, column and 3x3 square can only have one specific digit from 1 to 9
+# each row, column and 3x3 square can only have one specific keyboard_digit from 1 to 9
 
 verbose_counter = 0
 

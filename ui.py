@@ -2,6 +2,7 @@ import pygame
 import os
 import sys
 from algorithm import backtracking_algorithm_sudoku_solve
+from sudoku__generator import get_sudoku
 
 # init pygame
 pygame.init()
@@ -173,14 +174,27 @@ def game_end(given_message):
 
 
 # creation of the sudoku board from file and changeable indexes marking
-sudoku_board = read_from_file(sudoku_file_name)
+# sudoku_board = read_from_file(sudoku_file_name)
+# changeable_indexes = []
+# for i in range(len(sudoku_board)):
+#     for j in range(len(sudoku_board[0])):
+#         if sudoku_board[i][j] == 0:
+#             changeable_indexes.append((i, j))
+#
+# solved_sudoku_board = read_from_file(sudoku_file_name)
+# backtracking_algorithm_sudoku_solve(solved_sudoku_board)
+
+sudoku_board = get_sudoku()
+solved_sudoku_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0]]
 changeable_indexes = []
 for i in range(len(sudoku_board)):
     for j in range(len(sudoku_board[0])):
+        solved_sudoku_board[i][j] = sudoku_board[i][j]
         if sudoku_board[i][j] == 0:
             changeable_indexes.append((i, j))
 
-solved_sudoku_board = read_from_file(sudoku_file_name)
 backtracking_algorithm_sudoku_solve(solved_sudoku_board)
 
 

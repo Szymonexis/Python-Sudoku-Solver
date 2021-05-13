@@ -1,6 +1,7 @@
 # Python-Sudoku-Solver
  
 Sudoku solver which uses a Backtracking algorithm to create and provide solution for the sudoku grid
+Created using info from Wikipedia and various tutorials and explanations on YT
 <hr></hr>
 
 Backtracking is a general algorithm for finding all (or some) solutions to some computational problems, notably constraint satisfaction problems, that incrementally builds candidates to the solutions, and abandons a candidate ("backtracks") as soon as it determines that the candidate cannot possibly be completed to a valid solution.
